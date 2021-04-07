@@ -1,0 +1,62 @@
+.button {
+  width: 100px;
+  height: 25px;
+  padding: 2px;
+  margin: 5px;
+  border: 2px black solid;
+  background-color: #fed8b1;
+  text-align: center;
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-block;
+  user-select: none;
+}
+.button:hover {
+  background-color: orange;
+}
+.button:active {
+  background-color: darkorange;
+}
+
+.flex-container {
+  display: flex;
+}
+.flex-container > div {
+  margin-right: 20px;
+}
+
+.fotter {
+  font-size: small;
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-top: 10px;
+}
+
+.item {
+  margin-bottom: 5px;
+}
+.item > span {
+  display: block;
+}
+.item > label > span {
+  margin-left: 5px;
+}
+
+canvas {
+  position: absolute;
+  top: -20;
+  left: 0;
+}
+
+video, canvas {
+  transform: scaleX(-1);
+}
+
+div[name="debug"] > video, canvas[name="score"], div[name="debug-score"] {
+  opacity: 0;
+}
+
+div[name="debug-score"] > div > span {
+  margin-left: 10px;
+}

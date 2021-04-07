@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width"/>
+    <title>RFTIM</title>
+
+    <link href="index.css" rel="stylesheet">
+    <script src="./lib/face-api.min.js"></script>
+    <script src="index.js"></script>
+  </head>
+
+  <body>
+    <h1>RFTIM</h1>
+    <h2>Settings</h2>
+    <div name="settings">
+      <p>Basic</p>
+      <div class="item"><span>Image</span>
+        <input type="file" name="settings-image"/>
+      </div>
+      <div class="item"><span>Background color</span>
+        <input type="text" name="settings-bk-color"/>
+      </div>
+      <div class="item"><span>Blur weight</span>
+        <input type="text" name="settings-blur-weight"/>
+      </div>
+      <p>Expression</p>
+      <div class="item">
+        <label>
+          <input type="checkbox" name="settings-show-exp-txt"/><span>Show Expression text</span>
+        </label>
+      </div>
+      <div class="item"><span>Position X</span>
+        <input type="text" name="settings-exp-x"/>
+      </div>
+      <div class="item"><span>Position Y</span>
+        <input type="text" name="settings-exp-y"/>
+      </div>
+      <div class="item"><span>Size</span>
+        <input type="text" name="settings-exp-size"/>
+      </div>
+      <p>Other</p>
+      <div class="item">
+        <label>
+          <input type="checkbox" name="settings-debug"/><span>Debug</span>
+        </label>
+      </div>
+    </div>
+
+    <h2>View</h2>
+    <div name="debug" style="position: relative; margin-top: 20px;">
+      <video id="debug-video" width="480" height="360" autoplay muted></video>
+
+      <canvas id="icon-view" width="480" height="360"></canvas>
+      <canvas id="expression-view" width="480" height="360" style="transform: scaleX(1);"></canvas>
+
+      <div name="debug-score" style="font-family: monospace; font-weight: bold; position: absolute; top: 0; left: 10px;">
+        <p>Score</p>
+        <div name="debug-expression-angry">angry:<span></span></div>
+        <div name="debug-expression-disgusted">disgusted:<span></span></div>
+        <div name="debug-expression-fearful">fearful:<span></span></div>
+        <div name="debug-expression-happy">happy:<span></span></div>
+        <div name="debug-expression-neutral">neutral:<span></span></div>
+        <div name="debug-expression-sad">sad:<span></span></div>
+        <div name="debug-expression-surprised">surprised:<span></span></div>
+      </div>
+    </div>
+
+    <div class="fotter flex-container">
+      <div>v1.0.0</div>
+      <div><a target="_blank" href="https://github.com/weizlogy/rftim">Github</div>
+      <div><a target="_blank" href="https://twitter.com/twilightalpaca">Twitter</div>
+    </div>
+
+  </body>
+</html>
