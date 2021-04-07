@@ -199,9 +199,10 @@ function drawIcon() {
       const expcanvas = document.querySelector('#expression-view');
       const expctx = expcanvas.getContext('2d');
       expctx.clearRect(0, 0, expcanvas.width, expcanvas.height);
-      expctx.font = expConfig.size + "px sans-serif";
+      expctx.font = "bold " + expConfig.size + "px sans-serif";
       expctx.translate(0, 0);
       expctx.fillText(expConfig.text, -x + expConfig.x + expcanvas.width / 2, y + expConfig.y);
+      expctx.strokeText(expConfig.text, -x + expConfig.x + expcanvas.width / 2, y + expConfig.y);
     }
   }
 
@@ -218,6 +219,11 @@ function drawExpression() {
   temp.sort((c1, c2) => {
     return c2[1] - c1[1]
   });
+  if (temp[0][0] == 'neutral') {
+    expConfig.text = '';
+    requestAnimationFrame(drawExpression);
+    return;
+  }
   // console.log(temp[0][0], temp[0][1]);
   const strength = temp[0][1];
   expConfig.text = temp[0][0] + ' ' + '!'.repeat(Math.round(strength * 10) / 3);
