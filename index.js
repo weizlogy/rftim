@@ -8,6 +8,7 @@ var expConfig = {
   x: 0,
   y: 0,
   size: 30,
+  isEmoticon: false,
 };
 
 var blurWeight = 1;
@@ -30,6 +31,10 @@ window.addEventListener('DOMContentLoaded', async function() {
       document.querySelector('canvas[name="score"]').style.opacity = style;
     }
   };
+  document.querySelector('input[name="settings-fps"]').onchange = (e) => {
+    fpsRunning = !fpsRunning;
+    FrameRate(document.querySelector('div[name="debug-fps"]'));
+  };
   document.querySelector('input[name="settings-blur-weight"]').onchange = (e) => {
     blurWeight = parseFloat(e.target.value, 10);
   };
@@ -38,6 +43,9 @@ window.addEventListener('DOMContentLoaded', async function() {
   };
   document.querySelector('input[name="settings-show-exp-txt"]').onchange = (e) => {
     expConfig.isShow = e.target.checked;
+  };
+  document.querySelector('input[name="settings-use-emoticon"]').onchange = (e) => {
+    expConfig.isEmoticon = e.target.checked;
   };
   document.querySelector('input[name="settings-exp-x"]').onchange = (e) => {
     expConfig.x = parseFloat(e.target.value, 10);
@@ -219,14 +227,67 @@ function drawExpression() {
   temp.sort((c1, c2) => {
     return c2[1] - c1[1]
   });
-  if (temp[0][0] == 'neutral') {
+  const key = temp[0][0];
+  const strength = temp[0][1];
+  if (key == 'neutral') {
     expConfig.text = '';
     requestAnimationFrame(drawExpression);
     return;
   }
   // console.log(temp[0][0], temp[0][1]);
-  const strength = temp[0][1];
-  expConfig.text = temp[0][0] + ' ' + '!'.repeat(Math.round(strength * 10) / 3);
+  if (expConfig.isEmoticon) {
+    switch (key) {
+      case 'angry':
+        expConfig.text = '💢'.repeat(Math.round(strength * 10) / 3);
+        break;
+      case 'disgusted':
+        expConfig.text = '💫'.repeat(Math.round(strength * 10) / 3);
+        break;
+      case 'fearful':
+        expConfig.text = '🖤'.repeat(Math.round(strength * 10) / 3);
+        break;
+      case 'happy':
+        expConfig.text = '💞'.repeat(Math.round(strength * 10) / 3);
+        break;
+      case 'sad':
+        expConfig.text = '💧'.repeat(Math.round(strength * 10) / 3);
+        break;
+      case 'surprised':
+        expConfig.text = '❗'.repeat(Math.round(strength * 10) / 3);
+        break;
+    }
+  } else {
+    expConfig.text = key + ' ' + '!'.repeat(Math.round(strength * 10) / 3);
+  }
 
   requestAnimationFrame(drawExpression);
+}
+
+// FPS
+var fps = 0;
+var fpsRunning = false;
+function FrameRate(element) {
+  const output = element;
+  let st, et, d, count = 0, max = 30, fps = 0;
+  const counter = function() {
+    count++;
+    if(count === 1) {
+      st = new Date().getTime();
+    }
+    if(count === max) {
+      et = new Date().getTime();
+      d = et - st;
+      fps = count / d * 1000;
+      count = 0;
+      output.textContent = Math.round(fps);
+    }
+    if (!fpsRunning) {
+      return;
+    }
+    requestAnimationFrame(counter);
+  };
+  if (!fpsRunning) {
+    return;
+  }
+  requestAnimationFrame(counter);
 }

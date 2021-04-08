@@ -26,7 +26,12 @@
       <p>Expression</p>
       <div class="item">
         <label>
-          <input type="checkbox" name="settings-show-exp-txt"/><span>Show Expression text</span>
+          <input type="checkbox" name="settings-show-exp-txt"/><span>Show expression text</span>
+        </label>
+      </div>
+      <div class="item">
+        <label>
+          <input type="checkbox" name="settings-use-emoticon"/><span>Use emoticon</span>
         </label>
       </div>
       <div class="item"><span>Position X</span>
@@ -41,6 +46,11 @@
       <p>Other</p>
       <div class="item">
         <label>
+          <input type="checkbox" name="settings-fps"/><span>FPS</span>
+        </label>
+      </div>
+      <div class="item">
+        <label>
           <input type="checkbox" name="settings-debug"/><span>Debug</span>
         </label>
       </div>
@@ -53,7 +63,7 @@
       <canvas id="icon-view" width="480" height="360"></canvas>
       <canvas id="expression-view" width="480" height="360" style="transform: scaleX(1);"></canvas>
 
-      <div name="debug-score" style="font-family: monospace; font-weight: bold; position: absolute; top: 0; left: 10px;">
+      <div name="debug-score" class="debug-item" style="top: 0; left: 10px;">
         <p>Score</p>
         <div name="debug-expression-angry">angry:<span></span></div>
         <div name="debug-expression-disgusted">disgusted:<span></span></div>
@@ -62,6 +72,8 @@
         <div name="debug-expression-neutral">neutral:<span></span></div>
         <div name="debug-expression-sad">sad:<span></span></div>
         <div name="debug-expression-surprised">surprised:<span></span></div>
+      </div>
+      <div name="debug-fps" class="debug-item" style="top: -10px; left: 10px;">
       </div>
     </div>
 

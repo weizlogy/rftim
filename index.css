@@ -43,6 +43,12 @@
   margin-left: 5px;
 }
 
+.debug-item {
+  font-family: monospace;
+  font-weight: bold;
+  position: absolute;
+}
+
 canvas {
   position: absolute;
   top: -20;
