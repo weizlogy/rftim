@@ -182,6 +182,7 @@ async function detectMyFace() {
   requestAnimationFrame(detectMyFace);
 }
 
+var oldx, oldy, oldex, oldey, oldew, oldeh = 0;
 function drawIcon() {
   const file = document.querySelector('input[name="settings-image"]');
   const canvas = document.querySelector('#icon-view');
@@ -200,17 +201,24 @@ function drawIcon() {
       x = Math.round(x * weight) / weight;
       y = Math.round(y * weight) / weight;
     }
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(oldx, oldy, iconimg.width, iconimg.height);
     ctx.drawImage(iconimg, x, y);
+    oldx = x;
+    oldy = y;
 
     if (expConfig.isShow) {
       const expcanvas = document.querySelector('#expression-view');
       const expctx = expcanvas.getContext('2d');
-      expctx.clearRect(0, 0, expcanvas.width, expcanvas.height);
+      expctx.clearRect(oldex, oldey, oldew, oldeh);
       expctx.font = "bold " + expConfig.size + "px sans-serif";
       expctx.translate(0, 0);
       expctx.fillText(expConfig.text, -x + expConfig.x + expcanvas.width / 2, y + expConfig.y);
       expctx.strokeText(expConfig.text, -x + expConfig.x + expcanvas.width / 2, y + expConfig.y);
+      oldex = -x + expConfig.x + expcanvas.width / 2;
+      oldey = y + expConfig.y - expConfig.size;
+      oldew = expConfig.text.length * expConfig.size;
+      oldeh = expConfig.size * 1.5;
+      // expctx.strokeRect(oldex, oldey, oldew, oldeh); クリア範囲確認用
     }
   }
 
