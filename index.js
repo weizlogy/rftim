@@ -67,9 +67,9 @@ window.addEventListener('DOMContentLoaded', async function() {
     document.querySelector('#expression-view').height = expConfig.size + 10;
   };
   document.querySelector('input[name="settings-exp-talking-threshold"]').onchange = (e) => {
-    expConfig.size = parseFloat(e.target.value, 10);
+    expConfig.talkingthreshold = parseFloat(e.target.value, 10);
     if (isNaN(expConfig.talkingthreshold)) {
-      expConfig.size = 10;
+      expConfig.talkingthreshold = 10;
     }
   };
   document.querySelector('input[name="settings-exp-rtaw-key"]').onchange = (e) => {
