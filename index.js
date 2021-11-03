@@ -9,12 +9,13 @@ var expConfig = {
   y: 0,
   size: 30,
   isEmoticon: false,
+  talkingthreshold: 10,
+  rtawkey: '',
 };
-
-var blurWeight = 1;
 
 var detectionBox;
 var expression;
+var landmark;
 
 window.addEventListener('DOMContentLoaded', async function() {
   console.log('DOMContentLoaded.');
@@ -27,6 +28,7 @@ window.addEventListener('DOMContentLoaded', async function() {
     }
     document.querySelector('div[name="debug"] > video').style.opacity = style;
     document.querySelector('div[name="debug-score"]').style.opacity = style;
+    document.querySelector('div[name="debug-landmark"]').style.opacity = style;
     if (isStart) {
       document.querySelector('canvas[name="score"]').style.opacity = style;
     }
@@ -34,9 +36,6 @@ window.addEventListener('DOMContentLoaded', async function() {
   document.querySelector('input[name="settings-fps"]').onchange = (e) => {
     fpsRunning = !fpsRunning;
     FrameRate(document.querySelector('div[name="debug-fps"]'));
-  };
-  document.querySelector('input[name="settings-blur-weight"]').onchange = (e) => {
-    blurWeight = parseFloat(e.target.value, 10);
   };
   document.querySelector('input[name="settings-bk-color"]').onchange = (e) => {
     document.querySelector('#icon-view').style.backgroundColor = e.target.value;
@@ -67,6 +66,16 @@ window.addEventListener('DOMContentLoaded', async function() {
     }
     document.querySelector('#expression-view').height = expConfig.size + 10;
   };
+  document.querySelector('input[name="settings-exp-talking-threshold"]').onchange = (e) => {
+    expConfig.size = parseFloat(e.target.value, 10);
+    if (isNaN(expConfig.talkingthreshold)) {
+      expConfig.size = 10;
+    }
+  };
+  document.querySelector('input[name="settings-exp-rtaw-key"]').onchange = (e) => {
+    expConfig.rtawkey = e.target.value;
+  };
+
   const file = document.querySelector('input[name="settings-image"]');
   file.addEventListener('change', (e) => {
     const reader = new FileReader();
@@ -123,6 +132,7 @@ async function detectStart() {
   console.log('load models.');
   await faceapi.loadTinyFaceDetectorModel('/lib/models');
   await faceapi.loadFaceExpressionModel('/lib/models');
+  await faceapi.loadFaceLandmarkModel('/lib/models');
 
   console.log('start webcam.');
   const video = document.querySelector('#debug-video');
@@ -138,6 +148,7 @@ async function detectStart() {
     requestAnimationFrame(detectMyFace);
     requestAnimationFrame(drawIcon);
     requestAnimationFrame(drawExpression);
+    requestAnimationFrame(drawLandmark);
   });
 }
 
@@ -156,7 +167,7 @@ async function detectMyFace() {
   const displaySize = { width: video.width, height: video.height };
 
   const detections = await faceapi.detectSingleFace(
-    video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
+    video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
 
   if (!detections) {
     requestAnimationFrame(detectMyFace);
@@ -165,8 +176,11 @@ async function detectMyFace() {
 
   detectionBox = detections['detection']['box'];
   expression = detections['expressions'];
+  landmark = detections['landmarks'];
 
+  //** tetetetetetetetetetete */
   // console.log(detections);
+  
   expAngry.textContent = detections['expressions']['angry'];
   expDisgusted.textContent = detections['expressions']['disgusted'];
   expFearful.textContent = detections['expressions']['fearful'];
@@ -177,12 +191,12 @@ async function detectMyFace() {
 
   const detectionsForSize = faceapi.resizeResults(detections, displaySize);
   faceapi.matchDimensions(canvas, displaySize);
-  faceapi.draw.drawDetections(canvas, detectionsForSize);
+  faceapi.draw.drawDetections(canvas, detectionsForSize, 0.05);
+  faceapi.draw.drawFaceLandmarks(canvas, detectionsForSize);
 
   requestAnimationFrame(detectMyFace);
 }
 
-var oldx, oldy, oldex, oldey, oldew, oldeh = 0;
 function drawIcon() {
   const file = document.querySelector('input[name="settings-image"]');
   const canvas = document.querySelector('#icon-view');
@@ -194,31 +208,24 @@ function drawIcon() {
   }
 
   if (detectionBox) {
-    let x = detectionBox.x;
-    let y = detectionBox.y;
-    if (blurWeight && !isNaN(blurWeight)) {
-      const weight = blurWeight;
-      x = Math.round(x * weight) / weight;
-      y = Math.round(y * weight) / weight;
-    }
-    ctx.clearRect(oldx, oldy, iconimg.width, iconimg.height);
+    let x = 0;
+    let y = 0;
+    ctx.clearRect(0, 0, iconimg.width, iconimg.height);
     ctx.drawImage(iconimg, x, y);
-    oldx = x;
-    oldy = y;
 
     if (expConfig.isShow) {
       const expcanvas = document.querySelector('#expression-view');
       const expctx = expcanvas.getContext('2d');
-      expctx.clearRect(oldex, oldey, oldew, oldeh);
+      const oldex = expConfig.x + expcanvas.width / 2;
+      const oldey = expConfig.y - expConfig.size;
+      const oldew = expConfig.text.length * expConfig.size;
+      const oldeh = expConfig.size * 1.5;
+      expctx.clearRect(oldex, oldey, oldew * 2, oldeh);
       expctx.font = "bold " + expConfig.size + "px sans-serif";
       expctx.translate(0, 0);
-      expctx.fillText(expConfig.text, -x + expConfig.x + expcanvas.width / 2, y + expConfig.y);
-      expctx.strokeText(expConfig.text, -x + expConfig.x + expcanvas.width / 2, y + expConfig.y);
-      oldex = -x + expConfig.x + expcanvas.width / 2;
-      oldey = y + expConfig.y - expConfig.size;
-      oldew = expConfig.text.length * expConfig.size;
-      oldeh = expConfig.size * 1.5;
-      // expctx.strokeRect(oldex, oldey, oldew, oldeh); クリア範囲確認用
+      expctx.fillText(expConfig.text, oldex, expConfig.y);
+      expctx.strokeText(expConfig.text, oldex, expConfig.y);
+      // expctx.strokeRect(oldex, oldey, oldew, oldeh); ////クリア範囲確認用
     }
   }
 
@@ -237,38 +244,73 @@ function drawExpression() {
   });
   const key = temp[0][0];
   const strength = temp[0][1];
-  if (key == 'neutral') {
-    expConfig.text = '';
+  if (key == 'neutral' || strength < 0.7) {
+    expConfig.text = '  ';
     requestAnimationFrame(drawExpression);
+    if (isTalking) {
+      expConfig.text = '💭';
+    }
+    if (expConfig.rtawkey) {
+      RTAWRelation('neutral', 0);
+    }
     return;
   }
   // console.log(temp[0][0], temp[0][1]);
   if (expConfig.isEmoticon) {
     switch (key) {
       case 'angry':
-        expConfig.text = '💢'.repeat(Math.round(strength * 10) / 3);
+        expConfig.text = '💢';
         break;
       case 'disgusted':
-        expConfig.text = '💫'.repeat(Math.round(strength * 10) / 3);
+        expConfig.text = '💫';
         break;
       case 'fearful':
-        expConfig.text = '🖤'.repeat(Math.round(strength * 10) / 3);
+        expConfig.text = '🖤';
         break;
       case 'happy':
-        expConfig.text = '💞'.repeat(Math.round(strength * 10) / 3);
+        expConfig.text = '💞';
         break;
       case 'sad':
-        expConfig.text = '💧'.repeat(Math.round(strength * 10) / 3);
+        expConfig.text = '💧';
         break;
       case 'surprised':
-        expConfig.text = '❗'.repeat(Math.round(strength * 10) / 3);
+        expConfig.text = '❗';
         break;
-    }
+    }    
   } else {
     expConfig.text = key + ' ' + '!'.repeat(Math.round(strength * 10) / 3);
   }
+  if (isTalking) {
+    expConfig.text = '💭+' + expConfig.text;
+  }
+  if (expConfig.rtawkey) {
+    RTAWRelation(key, strength);
+  }
 
   requestAnimationFrame(drawExpression);
+}
+
+var isTalking = false;
+function drawLandmark() {
+  if (!landmark) {
+    requestAnimationFrame(drawLandmark);
+    return;
+  }
+
+  const mouth = landmark.getMouth();
+
+  // mouthの14と18のY座標差でトーク判定
+  if (mouth[18].y - mouth[14].y > expConfig.talkingthreshold) {
+    document.querySelector('div[name="debug-landmark-mouth-move"]').textContent =
+      'talking ' + (mouth[18].y - mouth[14].y);
+    isTalking = true;
+  } else {
+    document.querySelector('div[name="debug-landmark-mouth-move"]').textContent =
+      (mouth[18].y - mouth[14].y);
+    isTalking = false;
+  }
+
+  requestAnimationFrame(drawLandmark);
 }
 
 // FPS
@@ -298,4 +340,32 @@ function FrameRate(element) {
     return;
   }
   requestAnimationFrame(counter);
+}
+
+var socket = null;
+var oldemote = '';
+function RTAWRelation(emotion, strength) {
+  const mysender = () => {
+    if (oldemote == emotion) {
+      return;
+    }
+    oldemote = emotion;
+    const data = `{ "to": "${expConfig.rtawkey}", "emotion": "${emotion}", "strength": "${strength}" }`;
+    socket.send(data);
+  };
+  if (!socket) {
+    socket = new WebSocket(`wss://cloud.achex.ca/rtaw${expConfig.rtawkey}`);
+
+    socket.addEventListener('open', (ev) => {
+      socket.send(`{ "auth": "${expConfig.rtawkey}sender" }`);
+      mysender();
+    });
+    socket.addEventListener('message', (ev) => {
+      console.log(ev.data);
+    });
+    return;
+  }
+  if (socket.readyState == 1) {
+    mysender();
+  }
 }
