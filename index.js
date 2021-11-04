@@ -136,7 +136,22 @@ async function detectStart() {
 
   console.log('start webcam.');
   const video = document.querySelector('#debug-video');
-  video.srcObject = await navigator.mediaDevices.getUserMedia( { audio: false, video: {} });
+  video.srcObject = await navigator.mediaDevices.getUserMedia( { audio: false, video: { zoom: true } });
+
+  // ZOOM機能判定
+  const zoomslider = document.querySelector('input[name="settings-zoom"]')
+  const [track] = video.srcObject.getVideoTracks();
+  const capabilities = track.getCapabilities();
+  const settings = track.getSettings();
+  if ('zoom' in settings) {
+    zoomslider.min = capabilities.zoom.min;
+    zoomslider.max = capabilities.zoom.max;
+    zoomslider.step = capabilities.zoom.step;
+    zoomslider.value = settings.zoom;
+    zoomslider.oninput = function(event) {
+      track.applyConstraints({advanced: [ {zoom: event.target.value} ]});
+    }
+  }
 
   video.addEventListener('play', async () => {
     console.log('create canvas.');
